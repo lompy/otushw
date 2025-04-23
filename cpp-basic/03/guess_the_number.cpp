@@ -37,8 +37,7 @@ int print_usage_with_error_return()
 }
 
 int print_scores(storage::MinScoreFile &scores) {
-    std::cout << "High scores table:" << std::endl;
-    scores.write_to(std::cout);
+    std::cout << "High scores table:" << std::endl << scores;
 
     return 0;
 }

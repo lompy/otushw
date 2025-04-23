@@ -3,7 +3,6 @@
 #include <cstring>
 #include <fstream>
 #include <ostream>
-#include <stdexcept>
 
 namespace storage
 {
@@ -28,16 +27,20 @@ public:
     // Returns Error if file is not opened.
     std::optional<Error> open(std::string_view filename);
 
-    // Writes to out whole content of the file.
-    void write_to(std::ostream& out);
-
     // Inserts or updates in place minimum value for a key.
     void upsert(std::string_view key, int value);
+
+    friend std::ostream& operator<<(std::ostream& out, MinScoreFile& file);
 
 private:
     static constexpr int int_len = std::numeric_limits<int>::digits10 + 2;
     static constexpr char separator = ' ';
 
     std::fstream file;
+    void rewind()
+    {
+        file.clear();
+        file.seekg(0);
+    };
 };
 }

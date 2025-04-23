@@ -28,19 +28,21 @@ std::optional<storage::Error> storage::MinScoreFile::open(std::string_view filen
     return Error{"file not opened"};
 }
 
-void storage::MinScoreFile::write_to(std::ostream& out)
+std::ostream& storage::operator<<(std::ostream& out, storage::MinScoreFile& file)
 {
-    file.clear();
-    file.seekg(0);
+    file.rewind();
 
     std::string line;
-    while (std::getline(file, line)) out << line << std::endl;
+    while (std::getline(file.file, line)) out << line << std::endl;
+
+    file.rewind();
+
+    return out;
 }
 
 void storage::MinScoreFile::upsert(std::string_view key, int value)
 {
-    file.clear();
-    file.seekg(0);
+    rewind();
 
     std::string line;
     bool found = false;
@@ -68,4 +70,6 @@ void storage::MinScoreFile::upsert(std::string_view key, int value)
         file.clear();
         file << key << separator << std::setw(int_len) << value << std::endl;
     }
+
+    rewind();
 }
