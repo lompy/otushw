@@ -16,5 +16,6 @@ inline constexpr int found_no_value = 0;
  */
 int find_value_idx(int argc, char **argv, const char* option);
 
+bool has_option(int argc, char** argv, const char* option);
 bool found_with_value(int value_idx);
 }

@@ -24,6 +24,11 @@ int arguments::find_value_idx(int argc, char** argv, const char* option)
     }
 }
 
+bool arguments::has_option(int argc, char** argv, const char* option)
+{
+    return arguments::find_value_idx(argc, argv, option) != arguments::not_found;
+}
+
 bool arguments::found_with_value(int value_idx)
 {
     return value_idx > 0;
