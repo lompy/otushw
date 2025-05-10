@@ -16,6 +16,7 @@ set_target_properties(guess_the_number PROPERTIES
 
 target_compile_options(guess_the_number PRIVATE
     -Wall
+    -Wextra
     -Werror
     -Wpedantic
     -Wshadow
