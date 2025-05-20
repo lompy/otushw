@@ -1,8 +1,8 @@
 #pragma once
-#include <cmath>
+#include <istream>
 
 class Point {
-  public:
+public:
     Point() = default;
     inline Point(double x, double y) : x{x}, y{y} {};
     double x{};
@@ -28,4 +28,10 @@ inline Point operator/(const Point& p, double scalar) {
 inline double distance2(const Point& lhs, const Point& rhs) {
     const Point delta = lhs - rhs;
     return delta.x * delta.x + delta.y * delta.y;
+}
+
+inline std::istream& operator>>(std::istream& in, Point& point) {
+    in >> point.x >> point.y;
+
+    return in;
 }
