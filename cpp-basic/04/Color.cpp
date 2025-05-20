@@ -1,4 +1,5 @@
 #include "Color.hpp"
+#include <istream>
 
 Color::Color() = default;
 
@@ -15,4 +16,10 @@ double Color::green() const {
 
 double Color::blue() const {
     return b;
+}
+
+std::istream& operator>>(std::istream& in, Color& color) {
+    in >> color.r >> color.g >> color.b;
+
+    return in;
 }
