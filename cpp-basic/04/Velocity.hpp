@@ -3,10 +3,9 @@
 #include <cmath>
 
 class Velocity {
-  public:
+public:
     inline Velocity() = default;
 
-    // TODO: комментарии
     inline Velocity(double abs, double angle) {
         const double x = std::cos(angle);
         const double y = std::sin(angle);
@@ -25,6 +24,14 @@ class Velocity {
         return vec;
     }
 
-  private:
+private:
     Point vec;
 };
+
+inline std::istream& operator>>(std::istream& in, Velocity& velocity) {
+    Point p;
+    in >> p;
+    velocity.setVector(p);
+
+    return in;
+}
