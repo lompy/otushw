@@ -1,6 +1,7 @@
 #include "CRC32.hpp"
 
 #include <array>
+#include <istream>
 
 // https://web.archive.org/web/20080303102530/http://c.snippets.org/snip_lister.php?fname=crc_32.c
 constexpr std::array<uint32_t, 256> make_crc_table(uint32_t polynomial) {
@@ -17,6 +18,7 @@ constexpr std::array<uint32_t, 256> make_crc_table(uint32_t polynomial) {
         }
         table[i] = remainder;
     }
+
     return table;
 }
 
@@ -27,8 +29,16 @@ uint32_t updateCrc32(uint32_t octet, uint32_t crc) {
 }
 
 uint32_t crc32(const char *bytes, size_t bytesCount, uint32_t current) {
-    for (; bytesCount; --bytesCount, ++bytes) {
+    for (; bytesCount; --bytesCount, ++bytes)
         current = updateCrc32(static_cast<uint32_t>(*bytes), current);
-    }
+
+    return ~current;
+}
+
+uint32_t crc32(std::istream& in, uint32_t current) {
+    char byte {};
+    while (in.get(byte))
+        current = updateCrc32(static_cast<uint32_t>(byte), current);
+
     return ~current;
 }

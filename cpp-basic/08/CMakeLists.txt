@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(crc32_crack main.cpp
         CRC32.cpp
         CRC32.hpp
-        IO.cpp
-        IO.hpp)
+        IO.hpp
+        FirstValueWaiter.hpp)
 
 if (MSVC)
     target_compile_options(crc32_crack PUBLIC /W4)
