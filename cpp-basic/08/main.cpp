@@ -29,9 +29,12 @@ std::optional<uint32_t> pad_crc32(uint32_t orig_crc32, const char* injection,
     return std::nullopt;
 }
 
-std::array<uint32_t, 100> random_percent_sequence() {
-    std::array<uint32_t, 100> ranges;
+std::array<uint32_t, 50> random_percent_sequence() {
+    std::array<uint32_t, 50> ranges;
     std::iota(ranges.begin(), ranges.end(), 0);
+    std::transform(ranges.begin(), ranges.end(), ranges.begin(), [](uint32_t x) {
+        return x * 2;
+    });
     std::shuffle(ranges.begin(), ranges.end(), std::mt19937{std::random_device{}()});
 
     return ranges;
