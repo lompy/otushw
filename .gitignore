@@ -35,3 +35,26 @@
 **/.cache/
 **/compile_commands.json
 **/__pycache__/
+
+# linux-kernel-dev
+*.ko
+*.ko.cmd
+*.mod
+*.mod.c
+*.mod.cmd
+*.mod.o
+*.o.cmd
+Module.symvers
+modules.order
+.tmp_versions/
+.cache.mk
+.Module.symvers.cmd
+.modules.order.cmd
+.*.swp
+.*.swo
+*.dwo
+*.dtb
+*.dtb.cmd
+.built-in.a.cmd
+built-in.a
+.*.o.d
