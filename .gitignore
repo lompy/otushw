@@ -31,6 +31,8 @@
 *.out
 *.app
 
+**/CMakeFiles/
+
 **/build/
 **/.cache/
 **/compile_commands.json
