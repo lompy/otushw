@@ -1,0 +1,1 @@
+obj-m += ex_mutex.o ex_rwlock.o ex_semaphore.o ex_spinlock.o
