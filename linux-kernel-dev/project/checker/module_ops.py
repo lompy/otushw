@@ -72,8 +72,9 @@ class ModuleOps:
     def read_cpu_load(self):
         """Read CPU load data from the device"""
         try:
-            with open(self.device_path, 'r') as f:
-                return f.read().strip()
+            f = open(self.device_path, 'r')
+            os.set_blocking(f.fileno(), False)
+            return f.read().strip()
         except Exception as e:
             print(f"Failed to read CPU load: {e}")
             return None
