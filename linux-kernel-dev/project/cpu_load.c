@@ -163,9 +163,12 @@ static void cpu_load_timer_callback(struct timer_list *t)
 		pr_debug("cpu %d:%u%%\n", cpu, dev_data->ring.temp_sample[idx]);
 	}
 
-	write_lock(&dev_data->lock);
-	save_temp_sample();
-	write_unlock(&dev_data->lock);
+	{
+		unsigned long flags;
+		write_lock_irqsave(&dev_data->lock, flags);
+		save_temp_sample();
+		write_unlock_irqrestore(&dev_data->lock, flags);
+	}
 
 	{
 		spin_lock(&dev_data->readers_lock);
