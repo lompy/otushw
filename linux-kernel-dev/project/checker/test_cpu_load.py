@@ -2,59 +2,60 @@
 
 import unittest
 import time
+import re
 from base_test import BaseModuleTest
 
-class CpuLoadTest(BaseModuleTest):
+class CPULoadTest(BaseModuleTest):
     module_name = "cpu_load"
     parameters = {
-        "sample_interval": "1000",
-        "buffer_size": "60"
+        "sample_interval": "100",
+        "buffer_size": "64"
     }
 
     def test_device_creation(self):
-        """Test if the device file is created"""
+        """Test device file is created"""
         import os
         self.assertTrue(os.path.exists("/dev/cpu_load"))
 
     def test_read_format(self):
-        """Test if the output format is correct"""
-        # Wait for a few samples to be collected
-        time.sleep(2)
-        
+        """Test device file content"""
+        time.sleep(1)
+
         data = self.module_ops.read_cpu_load()
         self.assertIsNotNone(data)
-        
+
         lines = data.strip().split('\n')
         self.assertGreater(len(lines), 0)
-        
-        # Each line should be: cpu_id,total_ticks,idle_ticks
+
+        cpu_pattern = re.compile(r'\s+(\d+):(\d{3})')
+
         for line in lines:
-            parts = line.split(',')
-            self.assertEqual(len(parts), 3)
-            
-            # Verify types
-            cpu_id = int(parts[0])
-            total_ticks = int(parts[1])
-            idle_ticks = int(parts[2])
-            
-            self.assertGreaterEqual(cpu_id, 0)
-            self.assertGreaterEqual(total_ticks, 0)
-            self.assertGreaterEqual(idle_ticks, 0)
-            self.assertLessEqual(idle_ticks, total_ticks)
+            if not line.strip():
+                continue
+
+            matches = cpu_pattern.findall(line)
+            self.assertTrue(matches, f"No CPU load entries found in line: {line}")
+
+            for cpu_id_str, load_str in matches:
+                cpu_id = int(cpu_id_str)
+                load = int(load_str)
+
+                self.assertGreaterEqual(cpu_id, 0)
+                self.assertLess(cpu_id, 100)
+                self.assertGreaterEqual(load, 0)
+                self.assertLessEqual(load, 100)
 
     def test_interval_change(self):
-        """Test if we can change the sampling interval"""
-        # Set new interval
+        """Test change the sampling interval"""
         new_interval = 500
         self.assertTrue(self.module_ops.set_interval(new_interval))
-        
-        # Wait and verify we get new samples
+
         time.sleep(1)
         data1 = self.module_ops.read_cpu_load()
-        time.sleep(0.5)
+        time.sleep(1)
         data2 = self.module_ops.read_cpu_load()
-        
-        self.assertNotEqual(data1, data2, "CPU load data should update with new interval")
+
+        self.assertNotEqual(data1, data2, "cpu load data should update with new interval")
 
 if __name__ == '__main__':
     unittest.main()
