@@ -320,6 +320,7 @@ static ssize_t cpu_load_read(struct file *file, char __user *buf, size_t count,
 			reader->buf[reader->len++] = '\n';
 		} else {
 			pr_err("reader buffer overflow");
+			read_unlock(&dev_data->lock);
 
 			return -EOVERFLOW;
 		}
