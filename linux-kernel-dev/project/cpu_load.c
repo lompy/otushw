@@ -389,15 +389,17 @@ static int __init cpu_load_init(void)
 		return -EINVAL;
 	}
 
-	dev_data->num_cpus = num_online_cpus();
-	if (dev_data->num_cpus > MAX_SUPPORTED_CPUS) {
-		pr_err("too many cpus");
-		return -EINVAL;
-	}
-
 	dev_data = kzalloc(sizeof(*dev_data), GFP_KERNEL);
 	if (!dev_data)
 		return -ENOMEM;
+
+	dev_data->num_cpus = num_online_cpus();
+	if (dev_data->num_cpus > MAX_SUPPORTED_CPUS) {
+		pr_err("too many cpus");
+		ret = -EINVAL;
+
+		goto fail_num_online_cpus;
+	}
 
 	prev_stats = kzalloc(sizeof(struct cpu_load_stat) * dev_data->num_cpus,
 			     GFP_KERNEL);
@@ -519,6 +521,7 @@ fail_load_prev_stats:
 	kfree(dev_data->cpu_ids);
 fail_cpu_ids:
 	kfree(prev_stats);
+fail_num_online_cpus:
 fail_prev_stats:
 	kfree(dev_data);
 	return ret;
