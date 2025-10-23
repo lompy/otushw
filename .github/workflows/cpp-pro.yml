@@ -1,0 +1,50 @@
+name: 'cpp-pro CI'
+
+on:
+  push:
+    branches:
+      - main
+      - 'cpp-pro/*'
+    paths:
+      - 'cpp-pro/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - run: |
+          echo "PROJECT_PATH=$(echo ${{
+            github.event.head_commit.message ||
+            github.event.workflow_run.head_commit.message ||
+            github.event.pull_request.title
+          }} | sed -En 's/^\[(cpp-pro\/[A-Za-z0-9_-]+)\].*/\1/p')" >> $GITHUB_ENV
+      - run: |
+          echo "PROJECT_NAME=$(sed -En 's/^project\(([A-Za-z0-9_-]+).*/\1/p' ./$PROJECT_PATH/CMakeLists.txt)" >> $GITHUB_ENV
+      - run: sudo apt-get update && sudo apt-get install libboost-test-dev -y
+      - run: cd ./$PROJECT_PATH && cmake -B build -DPATCH_VERSION=${{ github.run_number }} -DWITH_BOOST_TEST=ON
+      - run: cd ./$PROJECT_PATH/build && cmake --build .
+      - run: cd ./$PROJECT_PATH/build && cmake --build . --target test
+      - run: cd ./$PROJECT_PATH/build && cmake --build . --target package
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: cpp-pro-${{ env.PROJECT_NAME }}-0-0-${{ github.run_number }}
+          release_name: Release cpp-pro-${{ env.PROJECT_NAME }}-0-0-${{ github.run_number }}
+          draft: false
+          prerelease: ${{ github.ref_name != 'main' }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ env.PROJECT_PATH }}/build/${{ env.PROJECT_NAME }}-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: ${{ env.PROJECT_NAME }}-0.0.${{ github.run_number }}-Linux.deb
+          asset_content_type: application/vnd.debian.binary-package
