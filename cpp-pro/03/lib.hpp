@@ -14,11 +14,8 @@ namespace sutoloc {
 
 int version();
 
-template <typename T, size_t block_size = 4096>
+template <typename T, size_t block_size = 512>
 class allocator {
-    static_assert(block_size >= sizeof(T), "block_size must fit T");
-    static_assert((block_size & (block_size - 1)) == 0, "block_size must be power of two");
-
     struct size_align {
         size_t size{};
         std::align_val_t align{};
@@ -49,8 +46,7 @@ class allocator {
 
     public:
         explicit block(size_align key_v) noexcept
-            : key{key_v}, available{block_size / key_v.size},
-              not_released{block_size / key_v.size} {};
+            : key{key_v}, available{block_size}, not_released{block_size} {};
 
         ~block() { ::operator delete(mem, key.align); };
 
@@ -71,13 +67,13 @@ class allocator {
 
         void* allocate(size_t num) {
             if (mem == nullptr)
-                mem = ::operator new(block_size, key.align);
+                mem = ::operator new(block_size * key.size, key.align);
 
             if (is_full(num))
                 throw std::bad_alloc{};
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            void* ptr{static_cast<std::byte*>(mem) + (key.size * (max() - available))};
+            void* ptr{static_cast<std::byte*>(mem) + (key.size * (block_size - available))};
             available -= num;
 
             return ptr;
@@ -88,7 +84,7 @@ class allocator {
                 not_released -= num;
             else
                 // reset when all released
-                not_released = (available = max());
+                not_released = (available = block_size);
         };
 
         bool owns(void* ptr) const noexcept {
@@ -96,9 +92,8 @@ class allocator {
                 return false;
 
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            return ptr >= mem && ptr < static_cast<std::byte*>(mem) + block_size;
+            return ptr >= mem && ptr < static_cast<std::byte*>(mem) + block_size * key.size;
         };
-        [[nodiscard]] size_t max() const noexcept { return block_size / key.size; };
         [[nodiscard]] bool is_full(size_t num) const noexcept { return available < num; };
         [[nodiscard]] bool is_released() const noexcept { return not_released == 0; };
     };
@@ -129,7 +124,7 @@ public:
     };
 
     T* allocate(size_t num) {
-        if (sizeof(T) * num > block_size)
+        if (num > block_size)
             return static_cast<T*>(::operator new(sizeof(T) * num, std::align_val_t{alignof(T)}));
 
         block* blk{head()};
@@ -140,7 +135,7 @@ public:
     };
 
     void deallocate(T* ptr, size_t num) {
-        if (sizeof(T) * num > block_size) {
+        if (num > block_size) {
             ::operator delete(static_cast<void*>(ptr), std::align_val_t{alignof(T)});
 
             return;
