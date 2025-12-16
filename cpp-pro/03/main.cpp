@@ -51,7 +51,7 @@ int main() try {
     print_map(std_map);
 
     std::cout << "std map with sutoloc::allocator" << "\n";
-    std::map<int, int, std::less<>, sutoloc::allocator<std::pair<const int, int>>>
+    std::map<int, int, std::less<>, sutoloc::allocator<std::pair<const int, int>, 10>>
         sutoloc_std_map{};
     fill(sutoloc_std_map);
     print_map(sutoloc_std_map);
@@ -63,7 +63,7 @@ int main() try {
     print_list(sutoloc_list);
 
     std::cout << "sutoloc::list with sutoloc::allocator" << "\n";
-    sutoloc::list<int, sutoloc::allocator<int>> sutoloc_allocator_list{};
+    sutoloc::list<int, sutoloc::allocator<int, 10>> sutoloc_allocator_list{};
     for (int i{0}; i < 10; ++i)
         sutoloc_allocator_list.push_back(i);
     print_list(sutoloc_allocator_list);
