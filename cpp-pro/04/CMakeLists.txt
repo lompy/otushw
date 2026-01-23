@@ -7,10 +7,10 @@ project(print_ip VERSION ${PROJECT_VESRION})
 
 option(WITH_BOOST_TEST "Whether to build Boost test" ON)
 
-configure_file(version.hpp.in version.hpp)
+configure_file(src/version.hpp.in version.hpp)
 
-add_executable(print_ip main.cpp)
-add_library(print_ip_lib lib.cpp)
+add_executable(print_ip src/main.cpp)
+add_library(print_ip_lib src/lib.cpp)
 
 set_target_properties(print_ip print_ip_lib PROPERTIES
     CXX_STANDARD 17
@@ -18,6 +18,7 @@ set_target_properties(print_ip print_ip_lib PROPERTIES
 )
 
 target_include_directories(print_ip_lib
+    PUBLIC "${CMAKE_SOURCE_DIR}/src"
     PRIVATE "${CMAKE_BINARY_DIR}"
 )
 
@@ -28,7 +29,7 @@ target_link_libraries(print_ip PRIVATE
 if(WITH_BOOST_TEST)
     find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
-    add_executable(test_version test_version.cpp)
+    add_executable(test_version tests/test_version.cpp)
     set_target_properties(test_version PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
@@ -42,7 +43,7 @@ if(WITH_BOOST_TEST)
         print_ip_lib
     )
 
-    add_executable(test_print_ip test_print_ip.cpp)
+    add_executable(test_print_ip tests/test_print_ip.cpp)
     set_target_properties(test_print_ip PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
